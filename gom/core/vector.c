@@ -107,7 +107,7 @@ int vector_copy(Vector *dst, const Vector *src)
         LOG_ERROR("Introduced source vector (src) withou memory allocation.");
         return 2;
     }
-    
+
     memcpy(dst->components, src->components, src->size * sizeof(double));
     if (dst->components == NULL){
         return 3;

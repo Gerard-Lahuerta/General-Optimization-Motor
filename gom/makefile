@@ -4,7 +4,7 @@ LDFLAGS = -lm
 # Set the level of logs to show (3 = INFO, 2 = WARN, 1 = ERROR, 0 = NONE)
 LOG_LEVEL ?= 2
 
-CUSTOM_FLAGS = -DLOG_LEVEL=$(LOG_LEVEL) 
+CUSTOM_FLAGS = -DLOG_LEVEL=$(LOG_LEVEL)
 CFLAGS = -Wall -Wextra -O3 -Iinclude $(CUSTOM_FLAGS)
 
 CORE_DIR = core
