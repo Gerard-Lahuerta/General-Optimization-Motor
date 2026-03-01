@@ -1,12 +1,19 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O3 -Iinclude
 LDFLAGS = -lm
 
+# Set the level of logs to show (3 = INFO, 2 = WARN, 1 = ERROR, 0 = NONE)
+LOG_LEVEL ?= 2
+
+CUSTOM_FLAGS = -DLOG_LEVEL=$(LOG_LEVEL) 
+CFLAGS = -Wall -Wextra -O3 -Iinclude $(CUSTOM_FLAGS)
+
+CORE_DIR = core
 BIN_DIR = bin
 TEST_DIR = test
 LOGIC_TEST_DIR = logic
 PERFORMANCE_TEST_DIR = performance
 CORE_OBJ = $(BIN_DIR)/vector.o
+CORE_SRC = $(CORE_DIR)/vector.c
 
 LOGIC_TEST_SOURCES = $(wildcard $(TEST_DIR)/$(LOGIC_TEST_DIR)/*.c)
 PERFORMANCE_TEST_SOURCES = $(wildcard $(TEST_DIR)/$(PERFORMANCE_TEST_DIR)/*.c)

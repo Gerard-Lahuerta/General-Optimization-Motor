@@ -16,7 +16,8 @@ int double_eq(double a, double b) {
 
 void test_vector_creation() {
     printf("Executing: test_vector_creation... ");
-    Vector v = create_vector(10);
+    Vector v;
+    vector_init(&v, 10);
     assert(v.size == 10);
     assert(v.components != NULL);
 
@@ -24,38 +25,64 @@ void test_vector_creation() {
         assert(v.components[i] == 0.0);
     }
 
-    free_vector(&v);
+    vector_free(&v);
     printf("%s %s VECTOR CREATION TEST PASSED%s\n",
         CLR_GREEN, ICON_CHECK, CLR_RESET);
 }
 
-void test_vector_sum() {
-    printf("Executing: test_vector_sum... ");
+void test_vector_add() {
+    printf("Executing: test_vector_add... ");
     double data1[] = {1.0, 2.0, 3.0};
     double data2[] = {4.0, 5.0, 6.0};
 
-    Vector v1 = create_vector(3);
-    Vector v2 = create_vector(3);
-    Vector res = create_vector(3);
+    Vector v1, v2, res;
+    vector_init(&v1, 3);
+    vector_init(&v2, 3);
+    vector_init(&res, 3);
 
-    assign_vector_components(&v1, data1, 3);
-    assign_vector_components(&v2, data2, 3);
+    set_vector_components(&v1, data1, 3);
+    set_vector_components(&v2, data2, 3);
 
-    sum_vectors(&res, &v1, &v2);
+    vector_add(&res, &v1, &v2);
 
     assert(double_eq(res.components[0], 5.0));
     assert(double_eq(res.components[1], 7.0));
     assert(double_eq(res.components[2], 9.0));
 
-    free_vector(&v1); free_vector(&v2); free_vector(&res);
-    printf("%s %s VECTOR SUM FUNCTION PASSED%s\n",
+    vector_free(&v1); vector_free(&v2); vector_free(&res);
+    printf("%s %s VECTOR ADD FUNCTION PASSED%s\n",
+        CLR_GREEN, ICON_CHECK, CLR_RESET);
+}
+
+void test_vector_sub() {
+    printf("Executing: test_vector_sub... ");
+    double data1[] = {4.0, 5.0, 6.0};
+    double data2[] = {3.0, 2.0, 1.0};
+
+    Vector v1, v2, res;
+    vector_init(&v1, 3);
+    vector_init(&v2, 3);
+    vector_init(&res, 3);
+
+    set_vector_components(&v1, data1, 3);
+    set_vector_components(&v2, data2, 3);
+
+    vector_sub(&res, &v1, &v2);
+
+    assert(double_eq(res.components[0], 1.0));
+    assert(double_eq(res.components[1], 3.0));
+    assert(double_eq(res.components[2], 5.0));
+
+    vector_free(&v1); vector_free(&v2); vector_free(&res);
+    printf("%s %s VECTOR SUBSTRACT FUNCTION PASSED%s\n",
         CLR_GREEN, ICON_CHECK, CLR_RESET);
 }
 
 int main() {
     printf("--- START OF AUTOMATIC VECTOR FUNCTIONS TESTS ---\n");
     test_vector_creation();
-    test_vector_sum();
+    test_vector_add();
+    test_vector_sub();
 
     printf("--- ALL VECTOR TESTS HAVE BEEN DONE ---\n");
     return 0;

@@ -11,15 +11,30 @@ typedef struct
     double *components;
 } Vector;
 
-Vector create_vector(unsigned size);
+// VECTOR CREATION
+int  vector_init(Vector *v, unsigned int size);
+void vector_free(Vector *v);
 
-void vector_zero(Vector *v);
+// BASIC UTILITIES
+int vector_zero(Vector *v);
+int vector_fill(Vector *v, double value);
+int vector_copy(Vector *dst, const Vector *src);
 
-void vector_resize(Vector *v, unsigned int new_size);
-void free_vector(Vector *v);
+// BASIC OPERATIONS
+int vector_add(Vector *res, const Vector *a, const Vector *b);
+int vector_sub(Vector *res, const Vector *a, const Vector *b);
+int vector_scale(Vector *res, const Vector *v, double alpha);
+double vector_dot(const Vector *a, const Vector *b);
+double vector_norm2(const Vector *v);
 
-void assign_vector_components(Vector *v, double *components, unsigned int size);
+// OTHER UTILITY FUNCTIONS
+int vector_axpy(Vector *res, double alpha, const Vector *x, const Vector *y);
+double vector_max_abs(const Vector *v);
+void vector_fill_random(Vector *v, double min, double max);
+int vector_resize(Vector *v, unsigned int new_size);
+int set_vector_components(Vector *v, double *components, unsigned int size);
 
-void sum_vectors(Vector *res, Vector *v, Vector *u);
+// AUXILARY FUNCTIONS
+void vector_print(const Vector *v);
 
 #endif
