@@ -13,16 +13,6 @@
 #include "logger.h"
 
 /*
-** ------------- INTERNAL FUNCTIONS -------------
-*/
-
-int same_size(const Vector *a, const Vector *b)
-{
-    return a->size == b->size;
-}
-
-
-/*
 ** ------------- VECTOR CREATION -------------
 */
 
@@ -33,7 +23,10 @@ int vector_init(Vector *v, unsigned int size)
         LOG_WARN("Introduced vector with size 0.");
     }
     else{
-        v->components = (double *)calloc(size, sizeof(double));
+        size_t n_bytes = size * sizeof(double);
+        size_t padded_size = (n_bytes + 63) & ~63;
+
+        v->components = (double *)aligned_alloc(64, padded_size);
 
         if (v->components == NULL)
         {
@@ -41,6 +34,8 @@ int vector_init(Vector *v, unsigned int size)
             LOG_ERROR("Not enough memory, vector size set to 0.");
             return 1;
         }
+
+        memset(v->components, 0, padded_size);
     }
     return 0;
 }
@@ -50,146 +45,12 @@ void vector_free(Vector *v)
     free(v->components);
 }
 
-
-/*
-** ------------- BASIC UTILITIES -------------
-*/
-
-int vector_zero(Vector *v)
-{
-    if (v->size == 0){
-        LOG_ERROR("Vector with dimensión 0 introduced.");
-        return 1;
-    }
-    if (v->components == NULL){
-        LOG_ERROR("Introduced vector withou memory allocation.");
-        return 2;
-    }
-
-    memset(v->components, 0, v->size * sizeof(double));
-    if(v->components == NULL){
-        LOG_ERROR("Impossible to fill vector with zeros.");
-        return 3;
-    }
-    return 0;
-}
-
-int vector_fill(Vector *v, double value)
-{
-    if (v->size == 0){
-        LOG_ERROR("Vector with dimensión 0 introduced.");
-        return 1;
-    }
-    if (v->components == NULL){
-        LOG_ERROR("Introduced vector withou memory allocation.");
-        return 2;
-    }
-
-    memset(v->components, value, v->size * sizeof(double));
-    if(v->components == NULL){
-        LOG_ERROR("Impossible to fill vector with value %lf.", value);
-        return 3;
-    }
-    return 0;
-}
-
-int vector_copy(Vector *dst, const Vector *src)
-{
-    if (!same_size(dst, src)){
-        LOG_ERROR(
-            "Vectors introduced with diferent sizes (%d, %d).",
-            dst->size,
-            src->size
-        );
-        return 1;
-    }
-    if (src->components == NULL){
-        LOG_ERROR("Introduced source vector (src) withou memory allocation.");
-        return 2;
-    }
-
-    memcpy(dst->components, src->components, src->size * sizeof(double));
-    if (dst->components == NULL){
-        return 3;
-    }
-    return 0;
-}
-
-
-/*
-** ------------- BASIC OPERATIONS -------------
-*/
-
-int vector_add(Vector *res, const Vector *a, const Vector *b)
-{
-    if (a->size != b->size || a->size != res->size || b->size != res->size){
-        LOG_ERROR(
-            "Vectors introduced with diferent sizes (%d, %d, %d).",
-            res->size,
-            a->size,
-            b->size
-        );
-        return 1;
-    }
-    if (b->size == 0){
-        LOG_ERROR("Vector with dimensión 0 introduced.");
-        return 2;
-    }
-
-    double *restrict pr = res->components;
-    double *restrict pb = b->components;
-    double *restrict pa = a->components;
-    unsigned n = res->size;
-
-    for (unsigned i = 0; i < n; i++)
-    {
-        pr[i] = pa[i] + pb[i];
-    }
-
-    return 0;
-}
-
-int vector_sub(Vector *res, const Vector *a, const Vector *b)
-{
-    if (a->size != b->size || a->size != res->size || b->size != res->size){
-        LOG_ERROR(
-            "Vectors introduced with diferent sizes (%d, %d, %d).",
-            res->size,
-            a->size,
-            b->size
-        );
-        return 1;
-    }
-    if (b->size == 0){
-        LOG_ERROR("Vector with dimensión 0 introduced.");
-        return 2;
-    }
-
-    double *restrict pr = res->components;
-    double *restrict pb = b->components;
-    double *restrict pa = a->components;
-    unsigned n = res->size;
-
-    for (unsigned i = 0; i < n; i++)
-    {
-        pr[i] = pa[i] - pb[i];
-    }
-
-    return 0;
-}
-
-int vector_scale(Vector *res, const Vector *v, double alpha);
-double vector_dot(const Vector *a, const Vector *b);
-double vector_norm2(const Vector *v);
-
-
 /*
 ** ------------- OTHER UTILITY FUNCTIONS -------------
 */
-
-int vector_axpy(Vector *res, double alpha, const Vector *x, const Vector *y);
-double vector_max_abs(const Vector *v);
 void vector_fill_random(Vector *v, double min, double max);
+
+double vector_max_abs(const Vector *v);
 
 int vector_resize(Vector *v, unsigned int new_size)
 {
@@ -221,4 +82,23 @@ int set_vector_components(Vector *v, double *components, unsigned int size)
 ** ------------- AUXILARY FUNCTIONS -------------
 */
 
-void vector_print(const Vector *v);
+void vector_print(const Vector *v) {
+    if (v == NULL){
+        printf(ANSI_YEL " - NULL - " ANSI_RESET);
+        return;
+    };
+
+    char* vector_text = (char*) malloc(v->size * 20 * sizeof(char));
+    vector_text[0] = '\0';
+
+    for (unsigned int i = 0; i < v->size; i++) {
+        char buffer[32];
+
+        sprintf(buffer, "%.2f ", v->components[i]);
+        strcat(vector_text, buffer);
+    }
+
+    fprintf(stdout, "%s\n", vector_text);
+
+    free(vector_text);
+}
