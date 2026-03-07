@@ -8,6 +8,7 @@
 #define LOG_LEVEL_ERROR 1
 #define LOG_LEVEL_WARN  2
 #define LOG_LEVEL_INFO  3
+#define LOG_LEVEL_ALL   4
 
 // Si no se define al compilar, por defecto mostramos hasta WARNINGS
 #ifndef LOG_LEVEL
@@ -15,17 +16,25 @@
 #endif
 
 #define ANSI_RED    "\x1b[31m"
-#define ANSI_YEL    "\x1b[33m"
+#define ANSI_YELL   "\x1b[33m"
+#define ANSI_CYAN   "\x1b[36m"
 #define ANSI_RESET  "\x1b[0m"
 
 // Macros inteligentes: solo compilan el printf si el nivel es el adecuado
 #define LOG_ERROR(msg, ...) \
-    if (LOG_LEVEL >= LOG_LEVEL_ERROR)  fprintf(stderr, ANSI_RED "[ERROR] " msg ANSI_RESET "\n", ##__VA_ARGS__)
+    ((void)((LOG_LEVEL >= LOG_LEVEL_ERROR) && \
+     fprintf(stderr, ANSI_RED "[ERROR] %s" ANSI_RESET "\n", msg, ##__VA_ARGS__)))
 
 #define LOG_WARN(msg, ...) \
-    if (LOG_LEVEL >= LOG_LEVEL_WARN)  fprintf(stdout, ANSI_YEL "[WARN]  " msg ANSI_RESET "\n", ##__VA_ARGS__)
+    ((void)((LOG_LEVEL >= LOG_LEVEL_WARN) && \
+     fprintf(stderr, ANSI_YELL "[WARN] %s" ANSI_RESET "\n", msg, ##__VA_ARGS__)))
 
 #define LOG_INFO(msg, ...) \
-    if (LOG_LEVEL >= LOG_LEVEL_INFO)  fprintf(stdout, "[INFO]  " msg "\n", ##__VA_ARGS__)
+    ((void)((LOG_LEVEL >= LOG_LEVEL_INFO) && \
+     fprintf(stderr, ANSI_CYAN "[INFO] %s" ANSI_RESET "\n", msg, ##__VA_ARGS__)))
+
+#define LOG(msg, ...) \
+    ((void)((LOG_LEVEL >= LOG_LEVEL_ALL) && \
+     fprintf(stderr, "[INFO] %s\n", msg, ##__VA_ARGS__)))
 
 #endif

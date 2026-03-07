@@ -14,7 +14,7 @@ def generate_error_header(csv_file, output_h):
         f.write(
             "/*\n** FILE GENERATED AUTOMATICALLY - DO NOT MODIFY MANUALLY\n"
         )
-        f.write("** Edit errores.csv and execute make_errors.py\n*/\n\n")
+        f.write("** Edit errores.csv and execute make_errors.py\n")
         f.write("** Check the documnetation for more information\n*/\n\n")
 
         # 2. Definition of ERROR_LIST with X-Macros
@@ -34,25 +34,36 @@ def generate_error_header(csv_file, output_h):
 
             # Add end of the line (unless its last line)
             if i < len(errors) - 1:
-                f.write(f"{line:<70} \\\n")
+                f.write(f"{line:<75} \\\n")
             else:
-                f.write(f"{line:<70}\n")
+                f.write(f"{line:<75}\n")
 
         f.write("\n")
 
-        # 3. Macros definition (CHECK_ERROR y CHECK_WARN)
-        f.write("#define CHECK_ERROR(condicion, codigo) \\\n")
+        # 3. Macros definition: CHECK_ERROR, CHECK_WARN & CHECK_CONDITION(s)
+        f.write("#define CHECK_CONDITION(condicion, codigo, tipo_log) \\\n")
+        f.write(
+            '    ((condicion) ? 1 : (tipo_log(get_error_msg(codigo)), 0))\n\n'
+        )
+
+        f.write("#define CHECK_E(condition, code) \\\n")
+        f.write("    CHECK_CONDITION(condition, code, LOG_ERROR)\n\n")
+
+        f.write("#define CHECK_W(condition, code) \\\n")
+        f.write("    CHECK_CONDITION(condition, code, LOG_WARN)\n\n")
+
+        f.write("#define ASSERT_ERROR(condicion, codigo) \\\n")
         f.write("    do { \\\n")
         f.write("        if (condicion) { \\\n")
-        f.write("            LOG_E(get_error_msg(codigo)); \\\n")
+        f.write("            LOG_ERROR(get_error_msg(codigo)); \\\n")
         f.write("            return codigo; \\\n")
         f.write("        } \\\n")
         f.write("    } while(0)\n\n")
 
-        f.write("#define CHECK_WARN(condicion, codigo) \\\n")
+        f.write("#define ASSERT_WARN(condicion, codigo) \\\n")
         f.write("    do { \\\n")
         f.write("        if (condicion) { \\\n")
-        f.write("            LOG_W(get_error_msg(codigo)); \\\n")
+        f.write("            LOG_WARN(get_error_msg(codigo)); \\\n")
         f.write("        } \\\n")
         f.write("    } while(0)\n\n")
 
